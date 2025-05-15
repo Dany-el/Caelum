@@ -1,10 +1,25 @@
+import java.util.Properties
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kspPlugin)
     alias(libs.plugins.hiltPlugin)
+    kotlin("plugin.serialization") version "2.1.20"
+
+    kotlin("kapt")
 }
+
+val localProperties = Properties().apply {
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) {
+        load(localPropsFile.inputStream())
+    }
+}
+
+val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY") ?: ""
 
 android {
     namespace = "com.yablonskyi.caelum"
@@ -18,6 +33,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
     }
 
     buildTypes {
@@ -38,7 +55,9 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+    android.buildFeatures.buildConfig = true
 }
 
 dependencies {
@@ -54,7 +73,7 @@ dependencies {
 
     // Hilt
     implementation (libs.hilt.android)
-    ksp (libs.hilt.android.compiler)
+    kapt (libs.hilt.android.compiler)
 
     // Retrofit
     implementation (libs.retrofit)
@@ -75,6 +94,12 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.androidx.room.testing)
+
+    implementation(libs.kotlinx.serialization.json)
+    api(libs.androidx.navigation.fragment)
+
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.ui.text.google.fonts)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
