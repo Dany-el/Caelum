@@ -25,6 +25,8 @@ class GetCoordinatesByCityUseCase @Inject constructor(
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred"))
         } catch (e: IOException) {
             emit(Resource.Error("Couldn't reach server. Check your internet connection."))
+        } catch (e: IndexOutOfBoundsException) {
+            emit(Resource.Error("City was not found"))
         }
     }
 }
