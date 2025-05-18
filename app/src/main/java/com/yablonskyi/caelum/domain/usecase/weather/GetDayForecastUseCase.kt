@@ -16,7 +16,7 @@ class GetDayForecastUseCase @Inject constructor(
         lat: Double,
         lon: Double,
         units: String = "metric",
-        cnt: Int = 8,
+        cnt: Int = 9,
         lang: String = "en",
     ): Flow<Resource<DayForecast>> = flow {
         try {
