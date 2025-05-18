@@ -1,5 +1,6 @@
 package com.yablonskyi.caelum.ui.weather.forecast
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -200,7 +201,7 @@ fun HourlyForecastItem(
             .height(120.dp)
     ) {
         Text(
-            text = time.toHourMinuteTime() // TODO
+            text = time.toHourMinuteTime(timezone) // TODO
         )
         Icon(
             painter = painterResource(
@@ -341,7 +342,8 @@ fun SunPosition(
     timezone: Long,
 ) {
     val now = System.currentTimeMillis() / 1000
-    val percentage = (((now - sunrise).toFloat() / (sunset - sunrise)) * 100) / 100
+    var percentage = (((now - sunrise).toFloat() / (sunset - sunrise)) * 100) / 100
+    if (percentage < 0) percentage = 1f
     val progress = percentage.coerceIn(0f, 1f)
 
     Card(
