@@ -25,11 +25,6 @@ class ForecastViewModel @Inject constructor(
     private val getCurrentForecastUseCase: GetCurrentWeatherUseCase,
     private val getDayForecastUseCase: GetDayForecastUseCase
 ) : ViewModel() {
-/*    private val _currentForecastState = mutableStateOf(CurrentForecastState())
-    val currentForecastState: State<CurrentForecastState> get() = _currentForecastState
-
-    private val _dayForecastState = mutableStateOf(DayForecastState())
-    val dayForecastState: State<DayForecastState> get() = _dayForecastState*/
 
     private val _coordState = mutableStateOf(CityCoordState())
     val cityCoordState: State<CityCoordState> get() = _coordState
@@ -39,99 +34,6 @@ class ForecastViewModel @Inject constructor(
 
     private val _forecastList = mutableStateListOf<ForecastBundle>()
     val forecastList: SnapshotStateList<ForecastBundle> get() = _forecastList
-
-    /*// TODO Optimize
-    fun getCurrentForecast(city: String) {
-
-        val alreadyExists = _forecastList.any {
-            it.city.city?.name.equals(city, ignoreCase = true)
-        }
-
-        if (alreadyExists) {
-            Log.i("Forecast", "City $city already exists in list, skipping API call")
-            return
-        }
-
-        getCoordinatesByCityUseCase(city).onEach { result ->
-            when (result) {
-                is Resource.Error -> {
-                    _coordState.value =
-                        CityCoordState(errorMsg = result.message ?: "An error occurred")
-                    Log.i("CoordResult", "Error")
-                }
-
-                is Resource.Loading -> {
-                    _coordState.value = CityCoordState(isLoading = true)
-                    Log.i("CoordResult", "Loading")
-                }
-
-                is Resource.Success -> {
-                    val coords = result.data
-                    _coordState.value = CityCoordState(city = coords)
-                    Log.i("CoordResult", "Success: $coords")
-
-                    if (coords != null) {
-                        if (_currentForecastState.value.forecast == null){
-                            getCurrentForecastUseCase(
-                                coords.lat,
-                                coords.lon,
-                                units = _units.value.param
-                            ).onEach { forecastResult ->
-                                when (forecastResult) {
-                                    is Resource.Error -> {
-                                        _currentForecastState.value = CurrentForecastState(
-                                            errorMsg = forecastResult.message ?: "An error occurred"
-                                        )
-                                        Log.i("ForecastResult", "Error")
-                                    }
-
-                                    is Resource.Loading -> {
-                                        _currentForecastState.value =
-                                            CurrentForecastState(isLoading = true)
-                                        Log.i("ForecastResult", "Loading")
-                                    }
-
-                                    is Resource.Success -> {
-                                        _currentForecastState.value =
-                                            CurrentForecastState(forecast = forecastResult.data)
-                                        Log.i("ForecastResult", "Success: ${forecastResult.data}")
-                                    }
-                                }
-                            }.launchIn(viewModelScope)
-                        }
-                        if (_dayForecastState.value.forecast == null){
-                            getDayForecastUseCase(
-                                coords.lat,
-                                coords.lon,
-                                units = _units.value.param
-                            ).onEach { forecastResult ->
-                                when (forecastResult) {
-                                    is Resource.Error -> {
-                                        _dayForecastState.value = DayForecastState(
-                                            errorMsg = forecastResult.message ?: "An error occurred"
-                                        )
-                                        Log.i("DayForecastResult", "Error")
-                                    }
-
-                                    is Resource.Loading -> {
-                                        _dayForecastState.value = DayForecastState(isLoading = true)
-                                        Log.i("DayForecastResult", "Loading")
-                                    }
-
-                                    is Resource.Success -> {
-                                        _dayForecastState.value =
-                                            DayForecastState(forecast = forecastResult.data)
-                                        Log.i("DayForecastResult", "Success: ${forecastResult.data}")
-                                    }
-                                }
-                            }.launchIn(viewModelScope)
-                        }
-                    }
-                }
-            }
-        }.launchIn(viewModelScope)
-    }
-*/
 
     fun getForecastForCity(cityName: String) {
         if (isCityAlreadyInList(cityName)) return
@@ -243,6 +145,10 @@ class ForecastViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun clearSearchResult() {
+        _coordState.value = CityCoordState()
     }
 
     fun changeUnits(new: Units) {
