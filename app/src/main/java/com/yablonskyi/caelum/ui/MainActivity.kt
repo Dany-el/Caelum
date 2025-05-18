@@ -16,8 +16,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.yablonskyi.caelum.ui.theme.CaelumTheme
-import com.yablonskyi.caelum.ui.weather.forecast.MainScreen
+import com.yablonskyi.caelum.ui.weather.forecast.HomeScreen
 import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.ForecastViewModel
+import com.yablonskyi.caelum.ui.weather.list.GreetingsScreen
+import com.yablonskyi.caelum.ui.weather.list.ListScreen
 import com.yablonskyi.caelum.ui.weather.list.LocationListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
@@ -63,26 +65,68 @@ fun CaelumNavHost(
         startDestination = Home
     ) {
         composable<Home> {
-            MainScreen(
-                forecastList = forecastList,
-                locationListState = locationListState,
-                units = units,
-                onRefresh = { currentCity ->
-                    forecastViewModel.getForecastForCity(currentCity.name)
-                },
-                onListButtonClick = {
+            if (!locationListState.isLoading && locationListState.cities.isEmpty()) {
+                GreetingsScreen(
+                    onNavigateClicked = {
+                        navController.navigate(List) {
+                            restoreState = true
+                            launchSingleTop = true
+                            popUpTo<Home>()
+                        }
+                    }
+                )
+            } else {
+                HomeScreen(
+                    forecastList = forecastList,
+                    locationListState = locationListState,
+                    units = units,
+                    onRefresh = { currentCity ->
+                        forecastViewModel.getForecastForCity(currentCity.name)
+                    },
+                    onListButtonClick = {
+                        navController.navigate(List) {
+                            restoreState = true
+                            launchSingleTop = true
+                            popUpTo<Home>()
+                        }
+                    },
+                    onSettingsButtonClick = {
+                        navController.navigate(Settings) {
+                            restoreState = true
+                            launchSingleTop = true
+                            popUpTo<Home>()
+                        }
+                    },
+                    onCityChange = { city ->
+                        forecastViewModel.getForecastForCity(city.name)
+                    }
+                )
 
-                },
-                onSettingsButtonClick = {
+            }
 
-                },
-                onCityChange = { city ->
-                    forecastViewModel.getForecastForCity(city.name)
-                }
-            )
         }
         composable<List> {
-
+            ListScreen(
+                locationListState = locationListState,
+                cityCoordState = cityCoordState,
+                onSearchButtonClicked = { name ->
+                    forecastViewModel.getCityCoordinates(name)
+                },
+                onAddButtonClicked = { city ->
+                    locationListViewModel.saveCity(city)
+                },
+                onDeleteButtonClicked = { city ->
+                    locationListViewModel.deleteCity(city)
+                },
+                onBackButtonClicked = {
+                    navController.navigate(Home) {
+                        restoreState = true
+                        launchSingleTop = true
+                        popUpTo<List>()
+                    }
+                },
+                onStartScreen = { forecastViewModel.clearSearchResult() }
+            )
         }
         composable<Settings> {
 
