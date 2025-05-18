@@ -43,25 +43,23 @@ import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.ForecastBundle
 import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.LocationListState
 
 @Composable
-fun MainScreen(
+fun HomeScreen(
     forecastList: List<ForecastBundle>,
     locationListState: LocationListState,
     units: Units,
     onRefresh: (City) -> Unit,
     onListButtonClick: () -> Unit,
     onSettingsButtonClick: () -> Unit,
-    onCityChange: (City) -> Unit
+    onCityChange: (City) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = {
         locationListState.cities.size
     })
 
-    if (locationListState.cities.isNotEmpty()) {
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect { page ->
-                onCityChange(locationListState.cities[page])
-                Log.d("Page change", "Page changed to $page")
-            }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            onCityChange(locationListState.cities[page])
+            Log.d("Page change", "Page changed to $page")
         }
     }
 
@@ -97,32 +95,27 @@ fun MainScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if (locationListState.cities.isEmpty()) {
-                TODO()
-            } else {
-                HorizontalPager(state = pagerState) { page ->
-                    val city = locationListState.cities[page]
-                    val forecastBundle = forecastList.find { it.cityState.city?.name == city.name }
+            HorizontalPager(state = pagerState) { page ->
+                val city = locationListState.cities[page]
+                val forecastBundle = forecastList.find { it.cityState.city?.name == city.name }
 
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxSize()
-                    ) {
-                        Text(city.name, Modifier.padding(vertical = 8.dp))
-                        WeatherCard(
-                            hourForecast = forecastBundle?.currentForecastState?.forecast,
-                            dayForecast = forecastBundle?.dayForecastState?.forecast,
-                            isLoading =
-                                forecastBundle?.currentForecastState?.isLoading == true ||
-                                        forecastBundle?.dayForecastState?.isLoading == true,
-                            unit = units,
-                        )
-                    }
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxSize()
+                ) {
+                    Text(city.name, Modifier.padding(vertical = 8.dp))
+                    WeatherCard(
+                        hourForecast = forecastBundle?.currentForecastState?.forecast,
+                        dayForecast = forecastBundle?.dayForecastState?.forecast,
+                        isLoading =
+                            forecastBundle?.currentForecastState?.isLoading == true ||
+                                    forecastBundle?.dayForecastState?.isLoading == true,
+                        unit = units,
+                    )
                 }
-
             }
         }
     }
@@ -216,17 +209,4 @@ private fun PagingItemPreview() {
             PagingItem(false)
         }
     }
-}
-
-
-@Preview
-@Composable
-private fun MainScreenPreview() {
-    /*    MainScreen(
-            CurrentForecastState(),
-            DayForecastState(),
-            onRefresh = {},
-            onSettingsButtonClick = {},
-            onSearchButtonClick = {}
-        )*/
 }
