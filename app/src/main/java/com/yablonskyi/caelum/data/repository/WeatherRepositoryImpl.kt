@@ -2,7 +2,6 @@ package com.yablonskyi.caelum.data.repository
 
 import android.util.Log
 import com.yablonskyi.caelum.data.local.dao.WeatherDao
-import com.yablonskyi.caelum.data.local.WeatherPreferences
 import com.yablonskyi.caelum.data.local.mapper.toDomain
 import com.yablonskyi.caelum.data.local.mapper.toEntity
 import com.yablonskyi.caelum.data.model.CityLatLonDTO
@@ -23,7 +22,7 @@ class WeatherRepositoryImpl @Inject constructor(
 ) :
     WeatherRepository {
     override suspend fun getCoordinatesByCity(city: String, limit: Int): List<CityLatLonDTO> {
-        return api.getCoordinatesByCity(city, limit)
+        return withContext(Dispatchers.IO) { api.getCoordinatesByCity(city, limit) }
     }
 
     override suspend fun getCurrentWeather(
