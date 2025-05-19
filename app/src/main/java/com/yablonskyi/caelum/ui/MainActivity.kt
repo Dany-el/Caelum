@@ -75,7 +75,7 @@ fun CaelumNavHost(
                         }
                     }
                 )
-            } else {
+            } else if (!locationListState.isLoading) {
                 HomeScreen(
                     forecastList = forecastList,
                     locationListState = locationListState,
