@@ -40,7 +40,7 @@ import com.yablonskyi.caelum.common.Units
 import com.yablonskyi.caelum.domain.model.City
 import com.yablonskyi.caelum.ui.theme.CaelumTheme
 import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.ForecastBundle
-import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.LocationListState
+import com.yablonskyi.caelum.ui.weather.list.LocationListState
 
 @Composable
 fun HomeScreen(
