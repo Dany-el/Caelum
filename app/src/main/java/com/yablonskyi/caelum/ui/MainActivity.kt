@@ -101,16 +101,16 @@ fun CaelumNavHost(
                         forecastViewModel.getForecastForCity(city.name)
                     }
                 )
-
             }
-
         }
         composable<List> {
             ListScreen(
                 locationListState = locationListState,
                 cityCoordState = cityCoordState,
+                forecastList = forecastList.toList(),
                 onSearchButtonClicked = { name ->
                     forecastViewModel.getCityCoordinates(name)
+//                    forecastViewModel.getForecastForCity(name)
                 },
                 onAddButtonClicked = { city ->
                     locationListViewModel.saveCity(city)
@@ -125,7 +125,9 @@ fun CaelumNavHost(
                         popUpTo<List>()
                     }
                 },
-                onStartScreen = { forecastViewModel.clearSearchResult() }
+                onStartScreen = {
+                    forecastViewModel.clearSearchResult()
+                }
             )
         }
         composable<Settings> {
