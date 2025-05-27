@@ -19,8 +19,7 @@ import javax.inject.Inject
 class WeatherRepositoryImpl @Inject constructor(
     private val api: WeatherApi,
     private val dao: WeatherDao,
-) :
-    WeatherRepository {
+) : WeatherRepository {
     override suspend fun getCoordinatesByCity(city: String, limit: Int): List<CityLatLonDTO> {
         return withContext(Dispatchers.IO) { api.getCoordinatesByCity(city, limit) }
     }

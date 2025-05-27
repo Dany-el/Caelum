@@ -1,4 +1,4 @@
-package com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day
+package com.yablonskyi.caelum.ui.weather.list
 
 import com.yablonskyi.caelum.domain.model.City
 

@@ -1,6 +1,5 @@
 package com.yablonskyi.caelum.domain.repository
 
-import com.yablonskyi.caelum.data.local.entity.CityEntity
 import com.yablonskyi.caelum.data.model.CityLatLonDTO
 import com.yablonskyi.caelum.domain.model.DayForecast
 import com.yablonskyi.caelum.domain.model.HourForecast
