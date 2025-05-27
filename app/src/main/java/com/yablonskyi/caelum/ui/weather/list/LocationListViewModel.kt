@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yablonskyi.caelum.domain.model.City
 import com.yablonskyi.caelum.domain.usecase.city.CityUseCases
-import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.LocationListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +22,7 @@ class LocationListViewModel @Inject constructor(
         loadSavedCities()
     }
 
-    fun loadSavedCities() {
+    private fun loadSavedCities() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
             try {
@@ -63,4 +62,3 @@ class LocationListViewModel @Inject constructor(
         }
     }
 }
-
