@@ -1,6 +1,12 @@
 package com.yablonskyi.caelum.ui.weather.forecast
 
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,14 +20,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,7 +46,6 @@ import com.yablonskyi.caelum.domain.model.Main
 import com.yablonskyi.caelum.domain.model.Weather
 import com.yablonskyi.caelum.domain.model.Wind
 import com.yablonskyi.caelum.ui.theme.CaelumTheme
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
@@ -54,52 +56,50 @@ fun WeatherCard(
     unit: Units,
     modifier: Modifier = Modifier
 ) {
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .animateContentSize(animationSpec = tween(500))
     ) {
-        if (isLoading || hourForecast == null || dayForecast == null) {
-            Box(
-                Modifier.fillMaxSize()
-            ) {
-/*                CircularProgressIndicator(
-                    modifier = Modifier.width(64.dp).align(Alignment.TopCenter),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )*/
-                LaunchedEffect(Unit) {
-                    delay(2000L)
-                }
+        AnimatedVisibility(
+            visible = !(isLoading || hourForecast == null || dayForecast == null),
+            enter = fadeIn(animationSpec = tween(500)) + slideInVertically(initialOffsetY = { it / 2 }),
+            exit = fadeOut(animationSpec = tween(300)) + slideOutVertically(targetOffsetY = { it / 2 })
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                WeatherOverview(
+                    temp = hourForecast!!.main.temp.roundToInt(),
+                    summary = hourForecast.weather[0].main,
+                    description = hourForecast.weather[0].description,
+                    sunrise = hourForecast.sunrise,
+                    sunset = hourForecast.sunset,
+                    time = hourForecast.time,
+                    timezone = hourForecast.timezone,
+                )
+                HourlyForecastList(
+                    list = dayForecast!!.list,
+                    sunrise = hourForecast.sunrise,
+                    sunset = hourForecast.sunset,
+                    timezone = hourForecast.timezone,
+                )
+                AdditionalWeatherData(
+                    feelsLike = hourForecast.main.feelsLike.roundToInt(),
+                    pressure = hourForecast.main.pressure,
+                    humidity = hourForecast.main.humidity,
+                    speed = hourForecast.wind.speed.roundToInt(),
+                    deg = hourForecast.wind.deg,
+                    visibility = hourForecast.visibility,
+                    cloudsPercentage = hourForecast.clouds.all,
+                    sunrise = hourForecast.sunrise,
+                    sunset = hourForecast.sunset,
+                    time = hourForecast.time,
+                    timezone = hourForecast.timezone,
+                    unit = unit
+                )
             }
-        } else {
-            WeatherOverview(
-                temp = hourForecast.main.temp.roundToInt(),
-                summary = hourForecast.weather[0].main,
-                description = hourForecast.weather[0].description,
-                sunrise = hourForecast.sunrise,
-                sunset = hourForecast.sunset,
-                timezone = hourForecast.timezone,
-            )
-            HourlyForecastList(
-                list = dayForecast.list,
-                sunrise = hourForecast.sunrise,
-                sunset = hourForecast.sunset,
-                timezone = hourForecast.timezone,
-            )
-            AdditionalWeatherData(
-                feelsLike = hourForecast.main.feelsLike.roundToInt(),
-                pressure = hourForecast.main.pressure,
-                humidity = hourForecast.main.humidity,
-                speed = hourForecast.wind.speed.roundToInt(),
-                deg = hourForecast.wind.deg,
-                visibility = hourForecast.visibility,
-                cloudsPercentage = hourForecast.clouds.all,
-                sunrise = hourForecast.sunrise,
-                sunset = hourForecast.sunset,
-                timezone = hourForecast.timezone,
-                unit = unit
-            )
         }
     }
 }
@@ -111,9 +111,9 @@ fun WeatherOverview(
     description: String,
     sunrise: Long,
     sunset: Long,
+    time: Long,
     timezone: Long
 ) {
-    val now = System.currentTimeMillis()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,8 +131,7 @@ fun WeatherOverview(
             Icon(
                 painter = painterResource(
                     summary.toIcon(
-                        description = description,
-                        now, sunrise, sunset, timezone
+                        description, time, sunrise, sunset, timezone
                     )
                 ),
                 contentDescription = "",
@@ -189,10 +188,6 @@ fun HourlyForecastItem(
     summary: String,
     description: String
 ) {
-    val now = System.currentTimeMillis() / 1000 + timezone
-    // TODO
-    val isCurrent = now >= time
-
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -230,16 +225,20 @@ fun AdditionalWeatherData(
     cloudsPercentage: Int,
     sunrise: Long,
     sunset: Long,
+    time: Long,
     timezone: Long,
     unit: Units
 ) {
     Column(
-        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .padding(top = 8.dp, bottom = 4.dp)
+                .fillMaxWidth()
         ) {
             // Visibility
             AdditionalWeatherItem(
@@ -264,8 +263,11 @@ fun AdditionalWeatherData(
             )
         }
         Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .padding(top = 4.dp, bottom = 8.dp)
+                .fillMaxWidth()
         ) {
             // Pressure
             AdditionalWeatherItem(
@@ -289,7 +291,7 @@ fun AdditionalWeatherData(
                 units = unit.humidityUnit()
             )
         }
-        SunPosition(sunrise, sunset, timezone)
+        SunPosition(sunrise, sunset, time, timezone)
     }
 }
 
@@ -302,7 +304,6 @@ fun AdditionalWeatherItem(
 ) {
     Card(
         modifier = Modifier
-            .padding(4.dp)
             .height(100.dp)
             .width(120.dp)
     ) {
@@ -339,10 +340,10 @@ fun AdditionalWeatherItem(
 fun SunPosition(
     sunrise: Long,
     sunset: Long,
+    time: Long,
     timezone: Long,
 ) {
-    val now = System.currentTimeMillis() / 1000
-    var percentage = (((now - sunrise).toFloat() / (sunset - sunrise)) * 100) / 100
+    var percentage = (((time - sunrise).toFloat() / (sunset - sunrise)) * 100) / 100
     if (percentage < 0) percentage = 1f
     val progress = percentage.coerceIn(0f, 1f)
 
@@ -409,6 +410,7 @@ private fun WeatherOverviewPreview() {
             "few clouds",
             1747275813,
             1747329809,
+            1748347632,
             10800
         )
     }
@@ -428,6 +430,7 @@ private fun AdditionalWeatherDataPreview() {
             0,
             1747275813,
             1747329809,
+            1748347632,
             10800,
             Units.METRICS
         )
@@ -454,6 +457,7 @@ private fun SunPositionPreview() {
         SunPosition(
             1747275813,
             1747329809,
+            1748347632,
             10800,
         )
     }
