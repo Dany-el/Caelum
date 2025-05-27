@@ -12,6 +12,7 @@ data class HourForecast(
     val clouds: Clouds,
     val sunrise: Long,
     val sunset: Long,
+    val time: Long,
     val timezone: Long,
 )
 

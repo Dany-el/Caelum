@@ -11,6 +11,7 @@ fun HourForecastEntity.toDomain(): HourForecast = HourForecast(
     clouds = clouds,
     sunrise = sunrise,
     sunset = sunset,
+    time = time,
     timezone = timezone
 )
 
@@ -25,5 +26,6 @@ fun HourForecast.toEntity(lat: Double, lon: Double): HourForecastEntity = HourFo
     sunrise = sunrise,
     sunset = sunset,
     timezone = timezone,
+    time = time,
     timestamp = System.currentTimeMillis()
 )

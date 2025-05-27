@@ -4,7 +4,10 @@ import androidx.room.BuiltInTypeConverters
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.yablonskyi.caelum.data.local.converters.*
+import com.yablonskyi.caelum.data.local.converters.CloudsConverter
+import com.yablonskyi.caelum.data.local.converters.MainConverter
+import com.yablonskyi.caelum.data.local.converters.WeatherListConverter
+import com.yablonskyi.caelum.data.local.converters.WindConverter
 import com.yablonskyi.caelum.domain.model.Clouds
 import com.yablonskyi.caelum.domain.model.Main
 import com.yablonskyi.caelum.domain.model.Weather
@@ -31,6 +34,7 @@ data class HourForecastEntity(
     val clouds: Clouds,
     val sunrise: Long,
     val sunset: Long,
+    val time: Long,
     val timezone: Long,
     val timestamp: Long
 )

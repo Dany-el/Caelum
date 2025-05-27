@@ -46,6 +46,7 @@ fun HourForecastDTO.toHourForecast(): HourForecast {
         ),
         sunrise = this.sys.sunrise,
         sunset = this.sys.sunset,
+        time = this.dt,
         timezone = this.timezone
     )
 }
