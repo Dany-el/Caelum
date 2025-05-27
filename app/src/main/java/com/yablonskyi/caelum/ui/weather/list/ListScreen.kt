@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -62,7 +64,9 @@ import com.yablonskyi.caelum.domain.model.City
 import com.yablonskyi.caelum.ui.theme.CaelumTheme
 import com.yablonskyi.caelum.ui.weather.forecast.AppPreview
 import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.CityCoordState
-import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.LocationListState
+import com.yablonskyi.caelum.ui.weather.forecast.viewmodel.day.ForecastBundle
+import com.yablonskyi.caelum.ui.weather.list.preview.cityListPreview
+import com.yablonskyi.caelum.ui.weather.list.preview.forecastListPreview
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -72,6 +76,7 @@ import kotlin.math.roundToInt
 fun ListScreen(
     locationListState: LocationListState,
     cityCoordState: CityCoordState,
+    forecastList: List<ForecastBundle>,
     onSearchButtonClicked: (String) -> Unit,
     onAddButtonClicked: (City) -> Unit,
     onDeleteButtonClicked: (City) -> Unit,
@@ -133,6 +138,7 @@ fun ListScreen(
                 ListState.DefaultListState -> {
                     CitiesList(
                         cityList = locationListState.cities,
+                        forecastList = forecastList,
                         onDelete = onDeleteButtonClicked
                     )
                 }
@@ -266,7 +272,12 @@ fun CitiesSearchBar(
                         focusManager.clearFocus()
                     }
                 ),
-                textStyle = MaterialTheme.typography.bodyMedium,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                ),
+                cursorBrush = SolidColor(
+                    if (isSystemInDarkTheme()) Color.White else Color.Black
+                ),
                 decorationBox = { innerTextField ->
                     if (textFieldValue.isEmpty()) {
                         Text(
@@ -286,6 +297,7 @@ fun CitiesSearchBar(
 @Composable
 fun CitiesList(
     cityList: List<City>,
+    forecastList: List<ForecastBundle>,
     onDelete: (City) -> Unit,
 ) {
     LazyColumn(
@@ -295,9 +307,19 @@ fun CitiesList(
         itemsIndexed(
             items = cityList,
             key = { _, item -> item.hashCode() }
-        ) { _, city ->
+        ) { index, city ->
             CityItem(
                 cityName = city.name,
+//                time = forecastList[index].currentForecastState.forecast?.time
+//                    ?: 0, // TODO
+//                timeZone = forecastList[index].currentForecastState.forecast?.timezone
+//                    ?: 0, // TODO
+//                temp = forecastList[index].currentForecastState.forecast?.main?.temp?.roundToInt()
+//                    ?: 0, // TODO,
+//                main = forecastList[index].currentForecastState.forecast?.weather?.first()?.main
+//                    ?: "", // TODO
+//                description = forecastList[index].currentForecastState.forecast?.weather?.first()?.description
+//                    ?: "", // TODO
                 onDelete = { onDelete(city) },
             )
         }
@@ -307,6 +329,11 @@ fun CitiesList(
 @Composable
 fun CityItem(
     cityName: String,
+/*    temp: Int,
+    time: Long,
+    timeZone: Long,
+    main: String,
+    description: String,*/
     onDelete: () -> Unit,
 ) {
 
@@ -317,8 +344,7 @@ fun CityItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp, horizontal = 8.dp)
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { _, delta ->
@@ -346,7 +372,8 @@ fun CityItem(
             color = Color(0xFFE34566),
             modifier = Modifier
                 .align(Alignment.Center)
-                .height(70.dp)
+                .padding(horizontal = 2.dp)
+                .height(96.dp)
                 .fillMaxWidth()
         ) {
             Box(
@@ -374,7 +401,12 @@ fun CityItem(
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
         ) {
             CityCard(
-                name = cityName
+                name = cityName,
+//                time = time,
+//                timeZone = timeZone,
+//                temp = temp,
+//                main = main,
+//                description = description
             )
         }
     }
@@ -383,27 +415,64 @@ fun CityItem(
 @Composable
 fun CityCard(
     name: String,
+//    time: Long,
+//    timeZone: Long,
+//    temp: Int,
+//    main: String,
+//    description: String,
 ) {
     Card(
         colors = CardDefaults.cardColors().copy(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
         modifier = Modifier
-            .height(80.dp)
+            .height(100.dp)
             .fillMaxWidth()
             .shadow(2.dp, CardDefaults.shape)
     ) {
         Box(
             modifier = Modifier
-                .padding(8.dp)
                 .fillMaxSize()
         ) {
-            Text(
-                text = name,
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .padding(8.dp)
+                    .fillMaxHeight()
+                    .padding(4.dp)
                     .align(Alignment.CenterStart)
-            )
+            ) {
+                Column {
+                    Text(
+                        text = name,
+                    )
+/*                    Text(
+                        text = time.toHourMinuteTime(timeZone),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )*/
+                }
+/*                Text(
+                    text = "$main - $description",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Right,
+                )*/
+            }
+/*            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.CenterEnd)
+            ) {
+                Text(
+                    text = "$temp${Typography.degree}",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 48.sp
+                    ),
+                    textAlign = TextAlign.Right,
+                )
+            }*/
         }
     }
 }
@@ -486,7 +555,7 @@ fun SearchCityItem(
         }
     }
 }
-
+/*
 @AppPreview
 @Composable
 private fun CityItemDefaultStatePreview() {
@@ -507,22 +576,30 @@ private fun CityItemSearchStatePreview() {
             onDelete = {}
         )
     }
+}*/
+
+@AppPreview
+@Composable
+private fun CityCardPreview() {
+    CaelumTheme {
+        CityCard(
+            "Odesa",
+//            1748347632,
+//            10800,
+//            23,
+//            "Rain",
+//            "scattered clouds"
+        )
+    }
 }
 
 @AppPreview
 @Composable
 private fun CitiesListPreview() {
-    val cityListPreview = listOf(
-        City(name = "Odesa", lat = 46.4843023, lon = 30.7322878),
-        City(name = "Kyiv", lat = 50.4501, lon = 30.5234),
-        City(name = "Lviv", lat = 49.8397, lon = 24.0297),
-        City(name = "Dnipro", lat = 48.4647, lon = 35.0462),
-        City(name = "Kharkiv", lat = 49.9935, lon = 36.2304)
-    )
-
     CaelumTheme {
         CitiesList(
             cityListPreview,
+            forecastListPreview,
             onDelete = {}
         )
     }
