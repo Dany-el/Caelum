@@ -57,15 +57,20 @@ class ForecastViewModel @Inject constructor(
         getCoordinatesByCityUseCase(cityName).onEach { result ->
             when (result) {
                 is Resource.Error -> {
+                    _coordState.value =
+                        CityCoordState(errorMsg = result.message ?: "An error occurred")
                     Log.i("CoordResult", "Error: ${result.message}")
                 }
 
                 is Resource.Loading -> {
+                    _coordState.value = CityCoordState(isLoading = true)
                     Log.i("CoordResult", "Loading")
                 }
 
                 is Resource.Success -> {
-                    result.data?.let { coords ->
+                    val city = result.data
+                    _coordState.value = CityCoordState(city = city)
+                    _coordState.value.city?.let { coords ->
                         addCityToForecastList(cityName, coords)
                         loadForecastsForCity(cityName, coords)
                     }
@@ -145,6 +150,14 @@ class ForecastViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun loadAllForecasts(cities: List<City>) {
+        if (cities.isNotEmpty()){
+            cities.forEach { city ->
+                loadCurrentForecast(city.name, city)
+            }
+        }
     }
 
     fun clearSearchResult() {
